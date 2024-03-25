@@ -4,6 +4,8 @@ import (
     "sync"
     "strconv"
     "crypto/cipher"
+
+    "github.com/pedroalbanese/loki97/internal/subtle"
 )
 
 const (
@@ -71,6 +73,10 @@ func (this *loki97Cipher) Encrypt(dst, src []byte) {
         panic("cryptobin/loki97: output not full block")
     }
 
+    if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
+        panic("cryptobin/loki97: invalid buffer overlap")
+    }
+
     encBlock := blockEncrypt(src, this.key)
     copy(dst, encBlock)
 }
@@ -82,6 +88,10 @@ func (this *loki97Cipher) Decrypt(dst, src []byte) {
 
     if len(dst) < BlockSize {
         panic("cryptobin/loki97: output not full block")
+    }
+
+    if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
+        panic("cryptobin/loki97: invalid buffer overlap")
     }
 
     decBlock := blockDecrypt(src, this.key);
